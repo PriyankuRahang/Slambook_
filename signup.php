@@ -1,0 +1,125 @@
+<?php
+session_start();
+
+?>
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Slambook</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<style>
+.check {
+    text-align: left;
+}
+</style>
+
+<body>
+    <?php
+    
+        include 'dbcon.php';
+        
+        if(isset($_POST['submit']))
+        {
+            $name = mysqli_real_escape_string($con, $_POST['name']);
+            $email = mysqli_real_escape_string($con, $_POST['email']);
+            $password = mysqli_real_escape_string($con, $_POST['password']);
+            $cpassword = mysqli_real_escape_string($con, $_POST['cpassword']);
+
+            $pass = password_hash($password, PASSWORD_BCRYPT);
+            $cpass = password_hash($cpassword, PASSWORD_BCRYPT);
+            
+            $hobbies="";
+
+            $token=bin2hex(random_bytes(15));
+            
+             if(isset($_POST['submit']))
+             {
+                 $hobbies=implode(',',$_POST['ch']);
+             }
+
+
+                $emailquery = "select * from registration where email='$email' ";
+                $query = mysqli_query($con,$emailquery);
+                $emailcount = mysqli_num_rows($query);
+                if ($emailcount>0 && $password !== $cpassword) {
+                    echo "Email already exist and Password is also not matching";
+                }
+                elseif($emailcount>0)
+                {
+                    ?>
+    <script>
+    alert("Email already exist!");
+    window.loation.href + "signup.php";
+    </script>
+    <?php
+                }
+                elseif($password===$cpassword)
+                {
+
+                                $insertquery="insert into registration(name, email, password, cpassword, token, hobbies) values( '$name','$email','$pass','$cpass','$token','$hobbies')";
+                                $iquery=mysqli_query($con,$insertquery);
+                                if($iquery)
+                                {
+                                    ?>
+    <script>
+    alert("Iserted successfully");
+    // window.loation.href = "login.php";
+    location.replace("login.php");
+    </script>
+    <?php
+                                }
+                                else{
+                                    ?>
+    <script>
+    alert("Not Inserted");
+    </script>
+    <?php
+                                }
+                        
+                } 
+                else{
+                    ?>
+    <script>
+    alert("Password is not matching!");
+    location.replace("signup.php");
+    </script>
+    <?php           
+                    }
+        }
+
+    ?>
+    <div class="sign-up-form">
+        <img src="icon.jpg" class="icon">
+        <h1>Sign Up</h1>
+        <p>Please fill in the form to create an account</p>
+        <hr>
+        <form action="<?php echo htmlentities($_SERVER['PHP_SELF']); ?>" method="POST" class="input-group">
+            <input type="text" placeholder="Enter your name" name="name" class="input-box" required>
+            <input type="text" placeholder="Enter your email-id" name="email" class="input-box" required>
+            <input type="password" placeholder="Enter your password" name="password" class="input-box" required>
+            <input type="password" placeholder="Re-enter your password" name="cpassword" class="input-box" required>
+            <span class="check">
+                <h2>Selecct Your Hobbies</h2><br>
+                <input type="checkbox" value="Travelling" name="ch[]"> Travelling<br>
+                <input type="checkbox" value="Cooking" name="ch[]"> Cooking<br>
+                <input type="checkbox" value="Photography" name="ch[]">Photography<br>
+                <input type="checkbox" value="Programming" name="ch[]"> Programming<br>
+                <input type="checkbox" value=" Music" name="ch[]"> Music<br>
+            </span>
+            <hr>
+            <button type=" submit" name="submit" class="signup-btn">Sign Up</button>
+            <input type="button" name="cancel" class="back-btn" value="Login"
+                onclick="window.location.href='login.php'" />
+        </form>
+    </div>
+
+</body>
+<script>
+if (window.history.replaceState) {
+    window.history.replaceState(null, null, window.location.href);
+}
+</script>
+
+</html>
